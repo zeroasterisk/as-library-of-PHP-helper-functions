@@ -16,7 +16,7 @@ or download and extract to:
 
 for CakePHP 2.0+ in your App/Config/bootstrap.php file:
 
-    App:uses('Lib', 'As.As');
+    App::uses('As', 'As.Lib');
 
 for CakePHP 1.3+ in your app/configs/bootstrap.php file:
 
