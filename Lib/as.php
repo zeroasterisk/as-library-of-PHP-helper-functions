@@ -1,10 +1,10 @@
 <?php
 /**
  * Library of helper functions
- * 
- * 
- * @link          https://github.com/zeroasterisk/as-library-of-PHP-helper-functions
- * @license       MIT License (http://www.opensource.org/licenses/mit-license.php)
+ *
+ *
+ * @link		  https://github.com/zeroasterisk/as-library-of-PHP-helper-functions
+ * @license	   MIT License (http://www.opensource.org/licenses/mit-license.php)
  */
 
 
@@ -48,7 +48,7 @@ class As {
 		if (!empty($input) || $input==0){
 			if (is_object($input)) {
 				$input = get_object_vars($input);
-			} 
+			}
 			while (is_array($input)) {
 				if ($trimReturn) {
 					$input = array_diff($input, array(null, '', ' '));
@@ -61,7 +61,7 @@ class As {
 	}
 
 	/**
-	 * Returns an array, derived from whatever the input was.  
+	 * Returns an array, derived from whatever the input was.
 	 * it will split a string by ',' (and whatever is passing in extraExploders)
 	 * @param mixed $input
 	 * @param array $extraExploders
@@ -73,7 +73,7 @@ class As {
 				$input = get_object_vars($input);
 			} elseif (!is_array($input)) {
 				if (!empty($extraExploders)) {
-					$input = explode(',', str_replace(selt::arrayCSV($extraExploders), ',', $input));
+					$input = explode(',', str_replace(as::arrayCSV($extraExploders), ',', $input));
 				} else {
 					$input = explode(',',$input);
 				}
@@ -85,7 +85,7 @@ class As {
 
 	/**
 	 * Returns a string, derived from whatever the input was.
-	 * if the input was an array, it implode with ',' 
+	 * if the input was an array, it implode with ','
 	 * @param mixed $input
 	 * @return array $inputAsArray
 	 */
@@ -93,11 +93,11 @@ class As {
 		if (!empty($input) || $input==0){
 			if (is_object($input)) {
 				$input = get_object_vars($input);
-			} 
+			}
 			if (is_array($input)) {
-				foreach ( $input as $key => $val ) { 
+				foreach ( $input as $key => $val ) {
 					if (is_array($val)) {
-						$input[$key] = self::stringCSV($val);
+						$input[$key] = as::stringCSV($val);
 					}
 				}
 				$input = implode(',',$input);
@@ -106,14 +106,58 @@ class As {
 		}
 		return '';
 	}
-	
+
+	/**
+	 * slugify - makes a string a slug-friendly string
+	 * (lower case, only dashes, no double-dashes)
+	 * @param mixed $input
+	 * @param string $splitter
+	 * @param int $limit_terms
+	 * @param bool $ucwords
+	 * @return string $slugFormattedInput
+	 */
+	function slugify($input='', $splitter=null, $limit_terms=null, $ucwords=null) {
+		$splitter = (!empty($splitter) && is_string($splitter) ? $splitter : '-');
+		$limit_terms = (!empty($limit_terms) && is_numeric($limit_terms) ? $limit_terms : 5);
+		$ucwords = (!empty($ucwords) && is_bool($ucwords) ? $ucwords : false);
+		if (is_array($input)) {
+			foreach ( $input as $key => $val ) {
+				$input[$key] = slugify($val, $splitter, $limit_terms, $ucwords);
+			}
+			return $input;
+		} else {
+			$limit_terms = intval($limit_terms);
+			$input = strtolower(trim($input));
+			$input = preg_replace('/[^0-9a-z\ ]/', ' ', $input);
+			$input = preg_replace('/(\s\s+)/', ' ', $input);
+			$terms = explode(' ', trim($input));
+			if (count($terms)>$limit_terms) {
+				$terms = array_diff($terms, array('a', 'of', 'the', 'an', 'be', 'are', 'is', 'was', 'were', 'his', 'he', 'her', 'she', 'how'));
+				if (count($terms)>$limit_terms) {
+					$terms = array_unique($terms);
+					if (count($terms)>$limit_terms) {
+						$terms = array_slice($terms, 0, $limit_terms);
+					}
+				}
+			}
+			if ($ucwords) {
+				foreach ( $terms as $k => $term ) {
+					if (strlen($term)>2) {
+						$terms[$k] = ucfirst($term);
+					}
+				}
+			}
+			return implode($splitter, $terms);
+		}
+	}
+
 	/**
 	 * just a simpler test function.  Tests if something is !emtpy() || == '0'
 	 * @param mixed $data
 	 * @param array $settings
-	 *        		$settings[allow] an array of values or a value which is allowed - if TRUE, we just us empty($data)
-	 *        		$settings[requireValuesInAllow] only allow values which are in $allow
-	 *        		$settings[disallow] values to disallow (if empty, we default to our known "empties")
+	 *				$settings[allow] an array of values or a value which is allowed - if TRUE, we just us empty($data)
+	 *				$settings[requireValuesInAllow] only allow values which are in $allow
+	 *				$settings[disallow] values to disallow (if empty, we default to our known "empties")
 	 * @return bool
 	 */
 	public static function isValid($data, $settings=array()) {
@@ -157,7 +201,7 @@ class As {
 	 */
 	public static function firstValid($input, $default=null, $isValidSettings=array()) {
 		if (is_array($input) && !empty($input)) {
-			foreach ( asArray($input) as $val ) { 
+			foreach ( asArray($input) as $val ) {
 				if (as::isValid($input, $isValidSettings)) {
 					return $val;
 				}
